@@ -9,8 +9,8 @@ import { useAnimations, useCursor, useFBX, useGLTF } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { useControls } from "leva";
 import * as THREE from "three";
-import { useLoadAnimations } from "@/hooks/useLoadAnimations";
-import { useLoadAudios } from "@/hooks/useLoadAudios";
+import { useLoadAnimations } from "./hooks/useLoadAnimations";
+import { useLoadAudios } from "./hooks/useLoadAudios";
 
 const corresponding = {
     A: "viseme_PP",
@@ -39,8 +39,8 @@ export function Avatar(props) {
         smoothMorphTarget: true,
         morphTargetSmoothing: 0.5,
         script: {
-            value: "welcome_zh",
-            options: ["welcome_zh", "touch1"],
+            value: "welcome",
+            options: ["welcome", "touch1"],
         },
         custionAction: false,
         action: {
@@ -149,9 +149,9 @@ export function Avatar(props) {
 
     useEffect(() => {
         if (playAudio) {
-            audio.play();
+            audio?.play();
         } else {
-            audio.pause();
+            audio?.pause();
         }
         if (animation != "Idle") {
             setAnimation("Idle", true, true);
@@ -160,7 +160,7 @@ export function Avatar(props) {
 
     useEffect(() => {
         if (playAudio) {
-            setAudio(script);
+            setAudio(script, true);
         }
     }, [script]);
 
