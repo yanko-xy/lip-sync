@@ -43,5 +43,5 @@ export const useLoadAudios = (defaultKey = "welcome_zh") => {
         }
     }, [audio?.ended]);
 
-    return { getAudio, audio, lipsync };
+    return { setAudio: getAudio, audio, lipsync };
 };

@@ -59,7 +59,7 @@ export function Avatar(props) {
         },
     });
 
-    const { getAudio: setAudio, audio, lipsync } = useLoadAudios();
+    const { setAudio, audio, lipsync } = useLoadAudios();
 
     const [pointerOver, setPointerOver] = useState(false);
     useCursor(pointerOver);
@@ -140,6 +140,13 @@ export function Avatar(props) {
         }
     });
 
+    const { scene } = useGLTF("models/66bc452579bf32ac3f6c266b.glb");
+    const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
+    const { nodes, materials } = useGraph(clone);
+
+    const group = useRef();
+    const { animation, setAnimation } = useLoadAnimations(group);
+
     useEffect(() => {
         if (playAudio) {
             audio.play();
@@ -147,7 +154,7 @@ export function Avatar(props) {
             audio.pause();
         }
         if (animation != "Idle") {
-            setAnimation("Idle", true);
+            setAnimation("Idle", true, true);
         }
     }, [playAudio]);
 
@@ -157,23 +164,11 @@ export function Avatar(props) {
         }
     }, [script]);
 
-    const { scene } = useGLTF("models/66bc452579bf32ac3f6c266b.glb");
-    const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
-    const { nodes, materials } = useGraph(clone);
-
-    const group = useRef();
-    const { actions, animation, setAnimation } = useLoadAnimations(group);
-
     useEffect(() => {
         if (custionAction) {
             setAnimation(playAction);
         }
     }, [playAction, custionAction]);
-
-    useEffect(() => {
-        actions[animation].reset().fadeIn(0.5).play();
-        return () => actions[animation].fadeOut(0.5);
-    }, [animation]);
 
     // CODE ADDED AFTER THE TUTORIAL (but learnt in the portfolio tutorial ♥️)
     useFrame((state) => {
@@ -191,7 +186,7 @@ export function Avatar(props) {
             onPointerLeave={() => setPointerOver(false)}
             onClick={() => {
                 setAudio("touch1");
-                setAnimation("Angry Point");
+                setAnimation("Angry Point", false);
             }}
         >
             <primitive object={nodes.Hips} />

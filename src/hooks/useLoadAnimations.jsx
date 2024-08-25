@@ -1,5 +1,6 @@
 import { useAnimations, useFBX } from "@react-three/drei";
-import { useRef, useState } from "react";
+import { act, useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 
 export const useLoadAnimations = (group, defaultAction = "Idle") => {
     const { animations: idleAnimation } = useFBX("animations/Idle.fbx");
@@ -39,18 +40,30 @@ export const useLoadAnimations = (group, defaultAction = "Idle") => {
 
     const [animation, set] = useState({
         value: defaultAction,
+        repeat: true,
         dev: false,
     });
-    const setAnimation = (value, dev = false) => {
+
+    const setAnimation = (value, repeat = true, dev = false) => {
         if (!animation.dev && dev === true) return;
         if (animation.value === value && animation.dev === dev) return;
+
         set({
             value,
+            repeat,
             dev,
         });
     };
 
     const { actions } = useAnimations(animationRef.current, group);
 
-    return { animation: animation.value, setAnimation, actions };
+    useEffect(() => {
+        const action = actions[animation.value];
+        action.setLoop(animation.repeat ? THREE.LoopRepeat : THREE.LoopOnce);
+        action.clampWhenFinished = true;
+        action.reset().fadeIn(0.5).play();
+        return () => action.fadeOut(0.5);
+    }, [animation]);
+
+    return { animation: animation.value, setAnimation };
 };
