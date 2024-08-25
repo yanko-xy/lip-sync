@@ -3,9 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 export const useLoadAudios = (defaultKey = "welcome_zh") => {
-    const [key, setKey] = useState(defaultKey);
     const audioFile = useMemo(() => new Audio(`audios/${defaultKey}.ogg`), []);
-    const jsonFile = useLoader(THREE.FileLoader, `audios/${key}.json`);
+    const jsonFile = useLoader(THREE.FileLoader, `audios/${defaultKey}.json`);
     const audioMap = useRef({
         [`${defaultKey}`]: {
             audio: audioFile,
@@ -14,19 +13,24 @@ export const useLoadAudios = (defaultKey = "welcome_zh") => {
     });
 
     const [audio, setAudio] = useState(audioFile);
-    const lipsync = JSON.parse(jsonFile);
+    const [lipsync, setLipsync] = useState(JSON.parse(jsonFile));
 
+    const loader = useRef(new THREE.FileLoader());
     const getAudio = async (key) => {
-        let newAudio = audioMap.current[key]?.audio;
+        let newAudio = audioMap.current[key];
         if (!newAudio) {
-            newAudio = new Audio(`audios/${key}.ogg`);
+            const audio = new Audio(`audios/${key}.ogg`);
+            const jsonFile = await loader.current.loadAsync(`audios/${key}.json`);
+            const json = JSON.parse(jsonFile);
             audioMap.current[key] = {
-                audio: newAudio,
+                audio: audio,
+                lipsync: json,
             };
+            newAudio = audioMap.current[key];
         }
 
-        setAudio(newAudio);
-        setKey(key);
+        setLipsync(newAudio.lipsync);
+        setAudio(newAudio.audio);
     };
 
     useEffect(() => {
