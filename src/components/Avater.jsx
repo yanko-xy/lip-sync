@@ -59,12 +59,14 @@ export function Avatar(props) {
         },
     });
 
-    const { getAutio, audio, lipsync } = useLoadAudios();
+    const { getAudio: setAudio, audio, lipsync } = useLoadAudios();
 
     const [pointerOver, setPointerOver] = useState(false);
     useCursor(pointerOver);
 
     useFrame(() => {
+        if (!audio) return;
+
         const currentAudioTime = audio.currentTime;
 
         if (currentAudioTime !== 0) {
@@ -89,12 +91,12 @@ export function Avatar(props) {
                 }
             });
 
-            if (audio.ended) {
-                audio.currentTime = 1;
-                setTimeout(() => {
-                    audio.currentTime = 0;
-                }, 100);
-            }
+            // if (audio.ended) {
+            //     audio.currentTime = 1;
+            //     setTimeout(() => {
+            //         audio.currentTime = 0;
+            //     }, 100);
+            // }
         }
         if (audio.paused || audio.ended) {
             if (!custionAction) {
@@ -150,9 +152,8 @@ export function Avatar(props) {
     }, [playAudio]);
 
     useEffect(() => {
-        const audio = getAutio(script);
         if (playAudio) {
-            audio.play();
+            setAudio(script);
         }
     }, [script]);
 
@@ -189,8 +190,7 @@ export function Avatar(props) {
             onPointerEnter={() => setPointerOver(true)}
             onPointerLeave={() => setPointerOver(false)}
             onClick={() => {
-                const newAudio = getAutio("touch1");
-                newAudio.play();
+                setAudio("touch1");
                 setAnimation("Angry Point");
             }}
         >
