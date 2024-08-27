@@ -34,7 +34,7 @@ export const LoadingScreen = (props) => {
                 className={`text-4xl md:text-9xl font-bold text-indigo-900 relative ${showTip ? "animate-pulse" : "animate-none"}`}
             >
                 <div
-                    className="absolute left-0 top-0  overflow-hidden truncate text-clip transition-all duration-500"
+                    className="absolute left-0 top-0  overflow-hidden text-clip transition-all duration-500"
                     style={{
                         width: `${progress}%`,
                     }}
