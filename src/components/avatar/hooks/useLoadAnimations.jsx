@@ -67,3 +67,14 @@ export const useLoadAnimations = (group, defaultAction = "Idle") => {
 
     return { animation: animation.value, setAnimation };
 };
+
+useFBX.preload("animations/Idle.fbx");
+useFBX.preload("animations/Sad Idle.fbx");
+useFBX.preload("animations/Happy Idle.fbx");
+useFBX.preload("animations/Robot Hip Hop Dance.fbx");
+useFBX.preload("animations/Wave Hip Hop Dance.fbx");
+useFBX.preload("animations/Locking Hip Hop Dance.fbx");
+useFBX.preload("animations/Rumba Dancing.fbx");
+useFBX.preload("animations/Angry Gesture.fbx");
+useFBX.preload("animations/Standing Greeting.fbx");
+useFBX.preload("animations/Angry Point.fbx");

@@ -148,4 +148,6 @@ export const useFacialExpressions = (scene) => {
             }),
         ),
     );
+
+    return { facialExpression, setFacialExpression };
 };

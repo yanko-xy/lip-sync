@@ -55,16 +55,21 @@ export function Avatar(props) {
     const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
     const { nodes, materials } = useGraph(clone);
 
-    const { setAudio, audio, lipsync, audioKey } = useVoice(clone);
+    // FacialExpressions
+    const { facialExpression, setFacialExpression } = useFacialExpressions(clone);
+
+    const { setAudio, audio, lipsync, audioKey } = useVoice(clone, () => {
+        setFacialExpression("");
+    });
     const [pointerOver, setPointerOver] = useState(false);
     useCursor(pointerOver);
 
     useFrame(() => {
-        if (!audio || audio.paused || audio.ended) {
-            if (!custionAction && animation != "Idle") {
-                setAnimation("Idle");
-            }
-        }
+        // if (!audio || audio.paused || audio.ended) {
+        //     if (!custionAction && animation != "Idle") {
+        //         setAnimation("Idle");
+        //     }
+        // }
     });
 
     const group = useRef();
@@ -86,12 +91,18 @@ export function Avatar(props) {
     // Eyes control
     useBlinkEye(clone);
 
-    // FacialExpressions
-    useFacialExpressions(clone);
-
     useControls("FacialExpressions", {
         chat: button(() => chat()),
     });
+
+    // Start Welcome
+    useEffect(() => {
+        setTimeout(() => {
+            setAudio("welcome");
+            setAnimation("Greeting");
+            setFacialExpression("smile");
+        }, 2000);
+    }, []);
 
     const firstTouch = useRef(true);
     return (
@@ -111,6 +122,7 @@ export function Avatar(props) {
                     setAudio(`touch${random}`, true);
                 }
                 setAnimation("Angry Point", false);
+                setFacialExpression("angry");
             }}
         >
             <primitive object={nodes.Hips} />
@@ -179,3 +191,5 @@ export function Avatar(props) {
         </group>
     );
 }
+
+useGLTF.preload("models/66bc452579bf32ac3f6c266b.glb");

@@ -15,7 +15,11 @@ const corresponding = {
     X: "viseme_PP",
 };
 
-export const useVoice = (scene, defaultKey = "welcome") => {
+const defaultCallback = (e) => {
+    console.log(e.key, "audio end");
+};
+
+export const useVoice = (scene, audioEndCallback = defaultCallback, defaultKey = "welcome") => {
     const { nodes } = useGraph(scene);
     const audioFile = useMemo(() => new Audio(`audios/${defaultKey}.ogg`), []);
     const jsonFile = useLoader(THREE.FileLoader, `audios/${defaultKey}.json`);
@@ -45,7 +49,6 @@ export const useVoice = (scene, defaultKey = "welcome") => {
         let newAudio = audioMap.current[key];
         if (!newAudio) {
             const audio = new Audio(`audios/${key}.ogg`);
-
             const jsonFile = await loader.current.loadAsync(`audios/${key}.json`);
             const json = JSON.parse(jsonFile);
             audioMap.current[key] = {
@@ -78,6 +81,7 @@ export const useVoice = (scene, defaultKey = "welcome") => {
             audio.currentTime = 0;
             setAudio(null);
             setKey(undefined);
+            audioEndCallback({ audio, key });
         }
     }, [audio?.ended]);
 
