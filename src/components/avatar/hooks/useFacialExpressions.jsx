@@ -1,8 +1,7 @@
-import { useSetupControls } from "@/hooks/useSetupControls";
 import { useFrame, useGraph } from "@react-three/fiber";
 import { useState } from "react";
 import { lerpMorphTarget } from "../utils";
-import { button } from "leva";
+import { button, useControls } from "leva";
 
 // face data
 const facialExpressions = {
@@ -90,44 +89,63 @@ export const useFacialExpressions = (scene) => {
     const { nodes } = useGraph(scene);
     const [facialExpression, setFacialExpression] = useState("");
 
+    const { setupMode } = useControls("Settings", {
+        setupMode: false,
+    });
+
     useFrame(() => {
-        Object.keys(nodes.EyeLeft.morphTargetDictionary).forEach((key) => {
-            const mapping = facialExpressions[facialExpression];
-            // exclude eyes
-            if (key === "eyeBlinkLeft" || key === "eyeBlinkRight") {
-                return;
-            }
-            if (mapping && mapping[key]) {
-                lerpMorphTarget(scene, key, mapping[key], 0.1);
-            } else {
-                lerpMorphTarget(scene, key, 0, 0.1);
-            }
-        });
+        !setupMode &&
+            Object.keys(nodes.EyeLeft.morphTargetDictionary).forEach((key) => {
+                const mapping = facialExpressions[facialExpression];
+                // exclude eyes
+                if (key === "eyeBlinkLeft" || key === "eyeBlinkRight") {
+                    return;
+                }
+                if (mapping && mapping[key]) {
+                    lerpMorphTarget(scene, key, mapping[key], 0.1);
+                } else {
+                    lerpMorphTarget(scene, key, 0, 0.1);
+                }
+            });
     });
 
-    const data = useSetupControls({
-        name: "FacialExpressions",
-        opts: {
-            facialExpression: {
-                options: Object.keys(facialExpressions),
-                onChange: (value) => setFacialExpression(value),
-            },
-            logMorphTargetValues: button(() => {
-                const emotionValues = {};
-                Object.keys(nodes.EyeLeft.morphTargetDictionary).forEach((key) => {
-                    // exclude eyes
-                    if (key === "eyeBlinkLeft" || key === "eyeBlinkRight") {
-                        return;
-                    }
-                    const value = nodes.EyeLeft.morphTargetInfluences[nodes.EyeLeft.morphTargetDictionary[key]];
-                    if (value > 0.01) {
-                        emotionValues[key] = value;
-                    }
-                });
-                console.log(JSON.stringify(emotionValues, null, 2));
-            }),
+    useControls("FacialExpressions", {
+        facialExpression: {
+            options: Object.keys(facialExpressions),
+            onChange: (value) => setFacialExpression(value),
         },
+        logMorphTargetValues: button(() => {
+            const emotionValues = {};
+            Object.keys(nodes.EyeLeft.morphTargetDictionary).forEach((key) => {
+                // exclude eyes
+                if (key === "eyeBlinkLeft" || key === "eyeBlinkRight") {
+                    return;
+                }
+                const value = nodes.EyeLeft.morphTargetInfluences[nodes.EyeLeft.morphTargetDictionary[key]];
+                if (value > 0.01) {
+                    emotionValues[key] = value;
+                }
+            });
+            console.log(JSON.stringify(emotionValues, null, 2));
+        }),
     });
 
-    console.log(data.facialExpression);
+    const [, set] = useControls("MorphTarget", () =>
+        Object.assign(
+            {},
+            ...Object.keys(nodes.EyeLeft.morphTargetDictionary).map((key) => {
+                return {
+                    [key]: {
+                        label: key,
+                        value: 0,
+                        min: nodes.EyeLeft.morphTargetInfluences[nodes.EyeLeft.morphTargetDictionary[key]],
+                        max: 1,
+                        onChange: (val) => {
+                            lerpMorphTarget(scene, key, val, 1);
+                        },
+                    },
+                };
+            }),
+        ),
+    );
 };

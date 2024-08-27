@@ -5,43 +5,18 @@ import { Suspense } from "react";
 import { Dots } from "./loadingdots/Dots";
 import { useControls } from "leva";
 import { atom, useAtom } from "jotai";
-import { useSetupControls } from "@/hooks/useSetupControls";
-
-export const settings = atom({ controlEnable: true, setupMode: false });
 
 export const Experience = () => {
     const texture = useTexture("textures/youtubeBackground.jpg");
     const viewport = useThree((state) => state.viewport);
 
-    const [setting, setSetting] = useAtom(settings);
-
-    const { controlEnabe } = useSetupControls({
-        name: "Settings",
-        opts: {
-            controlEnable: {
-                value: setting.controlEnable,
-                onChange: (value) => {
-                    setSetting({
-                        ...setting,
-                        controlEnable: value,
-                    });
-                },
-            },
-            setupMode: {
-                value: setting.setupMode,
-                onChange: (value) => {
-                    setSetting({
-                        ...setting,
-                        setupMode: value,
-                    });
-                },
-            },
-        },
+    const { controlEnable } = useControls("Settings", {
+        controlEnable: true,
     });
 
     return (
         <>
-            {setting.controlEnable && <OrbitControls />}
+            {controlEnable && <OrbitControls />}
 
             <Environment preset="sunset" />
             <Suspense>

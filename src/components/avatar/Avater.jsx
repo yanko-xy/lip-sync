@@ -10,10 +10,10 @@ import { SkeletonUtils } from "three-stdlib";
 import { button, useControls } from "leva";
 import * as THREE from "three";
 import { useLoadAnimations } from "./hooks/useLoadAnimations";
-import { useLoadAudios } from "./hooks/useLoadAudios";
-import { useSetupControls } from "@/hooks/useSetupControls";
+import { useVoice } from "./hooks/useVoice";
 import { useBlinkEye } from "./hooks/useBlinkEye";
 import { useFacialExpressions } from "./hooks/useFacialExpressions";
+import { getRandomNumber } from "./utils";
 
 const corresponding = {
     A: "viseme_PP",
@@ -29,22 +29,11 @@ const corresponding = {
 
 export function Avatar(props) {
     const {
-        playAudio,
-        script,
         headFollow,
-        smoothMorphTarget,
-        morphTargetSmoothing,
         custionAction,
         action: playAction,
     } = useControls({
-        playAudio: false,
         headFollow: true,
-        smoothMorphTarget: true,
-        morphTargetSmoothing: 0.5,
-        script: {
-            value: "welcome",
-            options: ["welcome", "touch1"],
-        },
         custionAction: false,
         action: {
             value: "Idle",
@@ -62,110 +51,24 @@ export function Avatar(props) {
         },
     });
 
-    const { setAudio, audio, lipsync } = useLoadAudios();
-
-    const [pointerOver, setPointerOver] = useState(false);
-    useCursor(pointerOver);
-
-    useFrame(() => {
-        if (!audio) return;
-
-        const currentAudioTime = audio.currentTime;
-
-        if (currentAudioTime !== 0) {
-            Object.values(corresponding).forEach((value) => {
-                if (!smoothMorphTarget) {
-                    nodes.Wolf3D_Head.morphTargetInfluences[nodes.Wolf3D_Head.morphTargetDictionary[value]] = 0;
-                    nodes.Wolf3D_Teeth.morphTargetInfluences[nodes.Wolf3D_Teeth.morphTargetDictionary[value]] = 0;
-                } else {
-                    nodes.Wolf3D_Head.morphTargetInfluences[nodes.Wolf3D_Head.morphTargetDictionary[value]] =
-                        THREE.MathUtils.lerp(
-                            nodes.Wolf3D_Head.morphTargetInfluences[nodes.Wolf3D_Head.morphTargetDictionary[value]],
-                            0,
-                            morphTargetSmoothing,
-                        );
-
-                    nodes.Wolf3D_Teeth.morphTargetInfluences[nodes.Wolf3D_Teeth.morphTargetDictionary[value]] =
-                        THREE.MathUtils.lerp(
-                            nodes.Wolf3D_Teeth.morphTargetInfluences[nodes.Wolf3D_Teeth.morphTargetDictionary[value]],
-                            0,
-                            morphTargetSmoothing,
-                        );
-                }
-            });
-
-            // if (audio.ended) {
-            //     audio.currentTime = 1;
-            //     setTimeout(() => {
-            //         audio.currentTime = 0;
-            //     }, 100);
-            // }
-        }
-        if (audio.paused || audio.ended) {
-            if (!custionAction) {
-                setAnimation("Idle");
-            }
-            return;
-        }
-
-        for (let i = 0; i < lipsync.mouthCues.length; i++) {
-            const mouthCue = lipsync.mouthCues[i];
-            if (currentAudioTime >= mouthCue.start && currentAudioTime <= mouthCue.end) {
-                if (!smoothMorphTarget) {
-                    nodes.Wolf3D_Head.morphTargetInfluences[
-                        nodes.Wolf3D_Head.morphTargetDictionary[corresponding[mouthCue.value]]
-                    ] = 1;
-                    nodes.Wolf3D_Teeth.morphTargetInfluences[
-                        nodes.Wolf3D_Teeth.morphTargetDictionary[corresponding[mouthCue.value]]
-                    ] = 1;
-                } else {
-                    nodes.Wolf3D_Head.morphTargetInfluences[
-                        nodes.Wolf3D_Head.morphTargetDictionary[corresponding[mouthCue.value]]
-                    ] = THREE.MathUtils.lerp(
-                        nodes.Wolf3D_Head.morphTargetInfluences[
-                            nodes.Wolf3D_Head.morphTargetDictionary[corresponding[mouthCue.value]]
-                        ],
-                        1,
-                        morphTargetSmoothing,
-                    );
-                    nodes.Wolf3D_Teeth.morphTargetInfluences[
-                        nodes.Wolf3D_Teeth.morphTargetDictionary[corresponding[mouthCue.value]]
-                    ] = THREE.MathUtils.lerp(
-                        nodes.Wolf3D_Teeth.morphTargetInfluences[
-                            nodes.Wolf3D_Teeth.morphTargetDictionary[corresponding[mouthCue.value]]
-                        ],
-                        1,
-                        morphTargetSmoothing,
-                    );
-                }
-                break;
-            }
-        }
-    });
-
     const { scene } = useGLTF("models/66bc452579bf32ac3f6c266b.glb");
     const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
     const { nodes, materials } = useGraph(clone);
 
+    const { setAudio, audio, lipsync, audioKey } = useVoice(clone);
+    const [pointerOver, setPointerOver] = useState(false);
+    useCursor(pointerOver);
+
+    useFrame(() => {
+        if (!audio || audio.paused || audio.ended) {
+            if (!custionAction && animation != "Idle") {
+                setAnimation("Idle");
+            }
+        }
+    });
+
     const group = useRef();
     const { animation, setAnimation } = useLoadAnimations(group);
-
-    useEffect(() => {
-        if (playAudio) {
-            audio?.play();
-        } else {
-            audio?.pause();
-        }
-        if (animation != "Idle") {
-            setAnimation("Idle", true, true);
-        }
-    }, [playAudio]);
-
-    useEffect(() => {
-        if (playAudio) {
-            setAudio(script, true);
-        }
-    }, [script]);
 
     useEffect(() => {
         if (custionAction) {
@@ -186,13 +89,11 @@ export function Avatar(props) {
     // FacialExpressions
     useFacialExpressions(clone);
 
-    const {} = useSetupControls({
-        name: "FacialExpressions",
-        opts: {
-            chat: button(() => chat()),
-        },
+    useControls("FacialExpressions", {
+        chat: button(() => chat()),
     });
 
+    const firstTouch = useRef(true);
     return (
         <group
             {...props}
@@ -201,7 +102,14 @@ export function Avatar(props) {
             onPointerEnter={() => setPointerOver(true)}
             onPointerLeave={() => setPointerOver(false)}
             onClick={() => {
-                setAudio("touch1");
+                if (audioKey && audioKey.startsWith("touch")) return;
+                if (firstTouch.current) {
+                    firstTouch.current = false;
+                    setAudio("touch1", true);
+                } else {
+                    const random = getRandomNumber(2, 3);
+                    setAudio(`touch${random}`, true);
+                }
                 setAnimation("Angry Point", false);
             }}
         >

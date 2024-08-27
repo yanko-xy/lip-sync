@@ -1,6 +1,5 @@
-import { useSetupControls } from "@/hooks/useSetupControls";
 import { useFrame } from "@react-three/fiber";
-import { button } from "leva";
+import { button, useControls } from "leva";
 import { useEffect, useState } from "react";
 import { lerpMorphTarget } from "../utils";
 import * as THREE from "three";
@@ -34,18 +33,15 @@ export const useBlinkEye = (scene) => {
         return () => clearTimeout(blinkTimeout);
     }, []);
 
-    const {} = useSetupControls({
-        name: "FacialExpressions",
-        opts: {
-            chat: button(() => chat()),
-            winkLeft: button(() => {
-                setWinkLeft(true);
-                setTimeout(() => setWinkLeft(false), 300);
-            }),
-            winkRight: button(() => {
-                setWinkRight(true);
-                setTimeout(() => setWinkRight(false), 300);
-            }),
-        },
+    useControls("FacialExpressions", {
+        chat: button(() => chat()),
+        winkLeft: button(() => {
+            setWinkLeft(true);
+            setTimeout(() => setWinkLeft(false), 300);
+        }),
+        winkRight: button(() => {
+            setWinkRight(true);
+            setTimeout(() => setWinkRight(false), 300);
+        }),
     });
 };

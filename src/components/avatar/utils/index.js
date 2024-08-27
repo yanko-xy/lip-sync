@@ -13,3 +13,8 @@ export const lerpMorphTarget = (scene, target, value, speed = 0.1) => {
         }
     });
 };
+
+// Random number
+export const getRandomNumber = (start, end) => {
+    return Math.floor(Math.random() * (end - start + 1)) + start;
+};
