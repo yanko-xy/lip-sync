@@ -44,7 +44,7 @@ export const useLoadAnimations = (group, defaultAction = "Idle") => {
         dev: false,
     });
 
-    const setAnimation = (value, repeat = true, dev = false) => {
+    const setAnimation = (value = defaultAction, repeat = true, dev = false) => {
         if (!animation.dev && dev === true) return;
         if (animation.value === value && animation.dev === dev) return;
 

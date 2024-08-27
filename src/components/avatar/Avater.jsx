@@ -58,22 +58,15 @@ export function Avatar(props) {
     // FacialExpressions
     const { facialExpression, setFacialExpression } = useFacialExpressions(clone);
 
+    const group = useRef();
+    const { animation, setAnimation } = useLoadAnimations(group);
+
     const { setAudio, audio, lipsync, audioKey } = useVoice(clone, () => {
         setFacialExpression("");
+        setAnimation();
     });
     const [pointerOver, setPointerOver] = useState(false);
     useCursor(pointerOver);
-
-    useFrame(() => {
-        // if (!audio || audio.paused || audio.ended) {
-        //     if (!custionAction && animation != "Idle") {
-        //         setAnimation("Idle");
-        //     }
-        // }
-    });
-
-    const group = useRef();
-    const { animation, setAnimation } = useLoadAnimations(group);
 
     useEffect(() => {
         if (custionAction) {
