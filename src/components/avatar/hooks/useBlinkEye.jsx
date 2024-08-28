@@ -34,7 +34,6 @@ export const useBlinkEye = (scene) => {
     }, []);
 
     useControls("FacialExpressions", {
-        chat: button(() => chat()),
         winkLeft: button(() => {
             setWinkLeft(true);
             setTimeout(() => setWinkLeft(false), 300);

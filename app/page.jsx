@@ -8,7 +8,7 @@ import { Suspense, useState } from "react";
 import { LoadingScreen } from "@/components/loadingscreen/LoadingScreen";
 
 export default function Page() {
-    const [started, setStarted] = useState(false);
+    const [started, setStarted] = useState(true);
 
     return (
         <>
@@ -18,7 +18,7 @@ export default function Page() {
                         <color attach="background" args={["#ececec"]} />
                         <Suspense>{started && <Experience />}</Suspense>
                     </Canvas>
-                    <Suspense>{started && <UI hidden />}</Suspense>
+                    <Suspense>{started && <UI />}</Suspense>
                     <LoadingScreen started={started} setStarted={setStarted} />
                 </ChatProvider>
             </div>

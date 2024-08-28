@@ -38,13 +38,20 @@ export const useVoice = (scene, audioEndCallback = defaultCallback, defaultKey =
         playAudio: false,
         script: {
             value: "welcome",
-            options: ["welcome", "touch1", "touch2", "touch3"],
+            options: ["welcome", "touch1", "touch2", "touch3", "intro1", "intro2"],
         },
         smoothMorphTarget: true,
         morphTargetSmoothing: 0.5,
     });
 
     const loader = useRef(new THREE.FileLoader());
+
+    const setAudioByOriginalAudio = (audio, lipsync) => {
+        setAudio(audio);
+        setLipsync(lipsync);
+        setKey(undefined);
+    };
+
     const getAudio = async (key, reset = false) => {
         let newAudio = audioMap.current[key];
         if (!newAudio) {
@@ -72,18 +79,15 @@ export const useVoice = (scene, audioEndCallback = defaultCallback, defaultKey =
     useEffect(() => {
         if (audio) {
             audio.play();
+            audio.onended = () => {
+                audio.currentTime = 0;
+                setAudio(null);
+                setKey(undefined);
+                audioEndCallback({ audio, key });
+            };
             return () => audio.pause();
         }
     }, [audio]);
-
-    useEffect(() => {
-        if (audio?.ended) {
-            audio.currentTime = 0;
-            setAudio(null);
-            setKey(undefined);
-            audioEndCallback({ audio, key });
-        }
-    }, [audio?.ended]);
 
     useEffect(() => {
         if (playAudio) {
@@ -170,5 +174,5 @@ export const useVoice = (scene, audioEndCallback = defaultCallback, defaultKey =
         }
     });
 
-    return { setAudio: getAudio, audio, lipsync, audioKey: key };
+    return { setAudio: getAudio, audio, lipsync, audioKey: key, setAudioByOriginalAudio };
 };

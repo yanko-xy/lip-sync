@@ -44,7 +44,7 @@ export const LoadingScreen = (props) => {
                 <div className="opacity-40">XGZS Yanko</div>
             </div>
             {showTip && (
-                <div className=" fixed bottom-4 text-3xl font-black text-indigo-900 animate-bounce">
+                <div className=" fixed bottom-4 text-xl md:text-3xl font-semibold md:font-black text-indigo-900 animate-bounce">
                     Click the screen to enter!
                 </div>
             )}

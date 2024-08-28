@@ -4,7 +4,6 @@ import { useThree } from "@react-three/fiber";
 import { Suspense } from "react";
 import { Dots } from "./loadingdots/Dots";
 import { Leva, useControls } from "leva";
-import { atom, useAtom } from "jotai";
 
 export const Experience = () => {
     const texture = useTexture("textures/youtubeBackground.jpg");
@@ -27,7 +26,7 @@ export const Experience = () => {
                 <planeGeometry args={[viewport.width, viewport.height]} />
                 <meshBasicMaterial map={texture} />
             </mesh>
-            <Leva hidden />
+            {/* <Leva hidden /> */}
         </>
     );
 };

@@ -14,6 +14,7 @@ import { useVoice } from "./hooks/useVoice";
 import { useBlinkEye } from "./hooks/useBlinkEye";
 import { useFacialExpressions } from "./hooks/useFacialExpressions";
 import { getRandomNumber } from "./utils";
+import { useChat } from "@/hooks/useChat";
 
 const corresponding = {
     A: "viseme_PP",
@@ -55,15 +56,18 @@ export function Avatar(props) {
     const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene]);
     const { nodes, materials } = useGraph(clone);
 
+    const { message, onMessagePlayed, chat } = useChat();
+
     // FacialExpressions
     const { facialExpression, setFacialExpression } = useFacialExpressions(clone);
 
     const group = useRef();
     const { animation, setAnimation } = useLoadAnimations(group);
 
-    const { setAudio, audio, lipsync, audioKey } = useVoice(clone, () => {
+    const { setAudio, audio, lipsync, audioKey, setAudioByOriginalAudio } = useVoice(clone, () => {
         setFacialExpression("");
         setAnimation();
+        onMessagePlayed();
     });
     const [pointerOver, setPointerOver] = useState(false);
     useCursor(pointerOver);
@@ -84,18 +88,29 @@ export function Avatar(props) {
     // Eyes control
     useBlinkEye(clone);
 
-    useControls("FacialExpressions", {
-        chat: button(() => chat()),
-    });
-
     // Start Welcome
     useEffect(() => {
+        if (true) return;
         setTimeout(() => {
             setAudio("welcome");
             setAnimation("Greeting");
             setFacialExpression("smile");
         }, 2000);
     }, []);
+
+    // Chat
+    useEffect(() => {
+        if (!message) return;
+        console.log(message);
+        const audio = new Audio("data:audio/mp3;base64," + message.audio);
+        setAudioByOriginalAudio(audio, message.lipsync);
+        setAnimation(message.animation);
+        setFacialExpression(message.facialExpression);
+    }, [message]);
+
+    useControls("Chat", {
+        chat: button(() => chat()),
+    });
 
     const firstTouch = useRef(true);
     return (
