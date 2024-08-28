@@ -10,6 +10,8 @@ const getFfmpegPath = () => {
 const ffmpegPath = getFfmpegPath();
 
 export const audioFileToBase64 = async (file) => {
+    console.log(file);
+
     const data = await fs.readFile(file);
     return data.toString("base64");
 };
