@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { promises as fs } from "fs";
 import os from "os";
+import path from "path";
 
 const getFfmpegPath = () => {
     const platform = os.platform() + "-" + os.arch();
@@ -10,14 +11,14 @@ const getFfmpegPath = () => {
 const ffmpegPath = getFfmpegPath();
 
 export const audioFileToBase64 = async (file) => {
-    console.log(file);
+    console.log(path.join(process.cwd(), file));
 
-    const data = await fs.readFile(file);
+    const data = await fs.readFile(path.join(process.cwd(), file));
     return data.toString("base64");
 };
 
 export const readJsonTranscript = async (file) => {
-    const data = await fs.readFile(file, "utf8");
+    const data = await fs.readFile(path.join(process.cwd(), file), "utf8");
     return JSON.parse(data);
 };
 

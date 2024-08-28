@@ -21,15 +21,15 @@ export async function POST(req) {
             messages: [
                 {
                     text: "有什么问题都可以像我提问，我会尽力为你解答",
-                    audio: await audioFileToBase64("audios/intro1.json"),
-                    lipsync: await readJsonTranscript("audios/intro1.json"),
+                    audio: await audioFileToBase64("public/audios/intro1.ogg"),
+                    lipsync: await readJsonTranscript("public/audios/intro1.json"),
                     facialExpression: "smile",
                     animation: "Greeting",
                 },
                 {
                     text: "如果没有问题的话，就当我放了个屁",
-                    audio: await audioFileToBase64("audios/intro2.ogg"),
-                    lipsync: await readJsonTranscript("audios/intro2.json"),
+                    audio: await audioFileToBase64("public/audios/intro2.ogg"),
+                    lipsync: await readJsonTranscript("public/audios/intro2.json"),
                     facialExpression: "funnyFace",
                     animation: "Happy Idle",
                 },
